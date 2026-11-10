@@ -2,6 +2,8 @@ class SettingsController < ApplicationController
   def show
     @years = FinancialYear.order(:year)
     @rules = RecurringRule.includes(:category).order(:description)
+    @google_calendar_configured = GoogleCalendarApi.configured?
+    @google_calendar_connected = current_user.google_calendar_connected?
   end
   def update
     year = FinancialYear.find(params[:financial_year_id])

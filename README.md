@@ -15,10 +15,10 @@ gem install bundler
 bundle install
 bin/rails db:migrate
 bin/rails account:setup
-bin/rails server -b 127.0.0.1
+bin/rails server -b localhost
 ```
 
-Abra **http://127.0.0.1:3000**. A tarefa `account:setup` pede e-mail, senha de pelo menos 12 caracteres e confirmação, sem mostrar a senha no terminal. Não há usuário ou senha padrão. É uma aplicação para uma pessoa: executar essa tarefa novamente atualiza a conta existente. Não é um sistema multiusuário com carteiras isoladas.
+Abra **http://localhost:3000**. Use `localhost` também no `GOOGLE_REDIRECT_URI` para que a sessão OAuth retorne ao mesmo host. A tarefa `account:setup` pede e-mail, senha de pelo menos 12 caracteres e confirmação, sem mostrar a senha no terminal. Não há usuário ou senha padrão. É uma aplicação para uma pessoa: executar essa tarefa novamente atualiza a conta existente. Não é um sistema multiusuário com carteiras isoladas.
 
 A primeira visita autenticada leva às Configurações. Crie um ano financeiro e informe seu saldo inicial; depois crie categorias e limites. Não há valores pessoais ou dados de demonstração nos seeds. Para preparar o banco automaticamente também pode usar `bin/rails db:prepare`.
 
@@ -33,6 +33,7 @@ A primeira visita autenticada leva às Configurações. Crie um ano financeiro e
 - Resumo anual dos 12 meses e totais anuais para cada situação.
 - Contas fixas com início, término opcional e dia de vencimento.
 - Compras parceladas, centavos distribuídos exatamente e criação automática de anos futuros.
+- Lembretes para despesas planejadas em dinheiro, sincronizados em um calendário dedicado do Google Calendar.
 - Importação XLSX com prévia criptografada, avisos e confirmação de substituição.
 - Backup JSON completo e restauração transacional com confirmação.
 - Autenticação obrigatória, CSRF, sessão com validade de 12 horas e restrição de tentativas de login.
@@ -68,6 +69,24 @@ Em Configurações, crie 2027 depois de 2026:
 Para água/luz com valor variável, cadastre uma estimativa e ajuste o lançamento de cada mês. O dia 31 é ajustado para o último dia dos meses mais curtos. Início e término são inclusivos. Cadastrar uma regra gera previsões em todos os anos existentes dentro da vigência; criar outro ano aplica as mesmas regras. A chave de origem impede gerar a mesma previsão duas vezes.
 
 Remover uma regra não apaga os lançamentos já gerados. Para mudar o valor de uma previsão, edite o lançamento. Para alterar uma regra permanente, remova a antiga e cadastre outra com vigência futura, verificando os lançamentos já criados para evitar duplicidade.
+
+### Lembretes no Google Calendar
+
+Em Configurações, conecte o Google Calendar para criar o calendário separado **Pagamentos**. O app sincroniza despesas em dinheiro ainda planejadas, inclusive parcelas, contas fixas já geradas e previsões vencidas. Entradas e benefícios ficam de fora. A tarefa aparece como evento de dia inteiro na data de vencimento e se repete nos dias seguintes enquanto estiver planejada. Ao marcar a despesa como realizada, os avisos param e o calendário guarda um evento “Pago”.
+
+O app cria avisos às 13h e às 19h, começando três dias antes do vencimento e repetindo diariamente até o registro como realizado. Esses avisos são eventos curtos no calendário para que o Google Calendar envie notificações nos horários definidos pelo app. A fatura de cartão que hoje é cadastrada em um único lançamento continua funcionando como uma despesa comum. O cadastro individual de compras, cartões e ciclos de fechamento e vencimento fica para uma etapa futura.
+
+Para habilitar a conexão, ative a **Google Calendar API** em um projeto Google Cloud e crie um cliente OAuth do tipo aplicativo Web. Cadastre como URI de redirecionamento autorizado o endereço completo `http://localhost:3000/configuracoes/google-calendar/callback` no desenvolvimento local, ou `https://SEU_HOST/configuracoes/google-calendar/callback` em produção. O valor precisa ser idêntico em `GOOGLE_REDIRECT_URI` e na lista de URIs autorizados do cliente OAuth.
+
+```text
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REDIRECT_URI=http://localhost:3000/configuracoes/google-calendar/callback
+```
+
+Defina essas variáveis no mesmo ambiente e antes de iniciar o Rails. Se usar valores exportados no terminal, reinicie o servidor nesse terminal após configurá-los. Este projeto não carrega automaticamente valores de um arquivo `.env`.
+
+Os tokens OAuth ficam criptografados no banco e não entram no backup JSON. A autorização usa o escopo do Google para calendários secundários criados pelo app. Os eventos pertencem à sua conta e podem ser editados manualmente no Google Calendar; o app continua sendo a fonte principal e não importa edições feitas no calendário. Desconectar remove os eventos criados pelo app e revoga a autorização; o calendário vazio “Pagamentos” permanece na sua lista do Google Calendar e será reutilizado se você reconectar.
 
 ### Parcelas entre 2026 e 2027
 

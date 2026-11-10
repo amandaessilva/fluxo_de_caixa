@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_11_10_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_11_10_010000) do
   create_table "categories", force: :cascade do |t|
     t.string "name", null: false
     t.datetime "created_at", null: false
@@ -35,6 +35,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_000000) do
     t.integer "installments_count"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.date "completed_on"
     t.index ["category_id"], name: "index_entries_on_category_id"
     t.index ["financial_year_id", "date", "status"], name: "index_entries_on_financial_year_id_and_date_and_status"
     t.index ["financial_year_id"], name: "index_entries_on_financial_year_id"
@@ -97,6 +98,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_11_10_000000) do
     t.string "password_digest", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "google_calendar_id"
+    t.text "google_refresh_token_ciphertext"
+    t.text "google_access_token_ciphertext"
+    t.datetime "google_access_token_expires_at"
+    t.text "google_calendar_sync_error"
     t.index ["email"], name: "index_users_on_email", unique: true
   end
 

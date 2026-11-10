@@ -22,15 +22,26 @@ class EntriesController < ApplicationController
     @entry = Entry.new(attrs)
     count = Integer(params[:installments].presence || 1)
     raise ArgumentError, 'Use entre 1 e 120 parcelas.' unless (1..120).cover?(count)
-    Entry.transaction do
-      if count > 1
-        @entry = InstallmentBuilder.call(attrs, count: count).first
-      else
+    creates_new_year = @entry.date && !FinancialYear.exists?(year: @entry.date.year)
+    if count > 1 || creates_new_year
+      GoogleCalendarEntrySync.suppress_callbacks do
+        Entry.transaction do
+          if count > 1
+            @entry = InstallmentBuilder.call(attrs, count: count).first
+          else
+            @entry.financial_year = YearBuilder.call(@entry.date.year)
+            @entry.save!
+          end
+        end
+      end
+      sync_google_calendar_if_connected
+    else
+      Entry.transaction do
         @entry.financial_year = YearBuilder.call(@entry.date.year) if @entry.date
         @entry.save!
       end
     end
-    redirect_to entry_path(@entry), notice: count > 1 ? 'Parcelas planejadas e anos necessários criados.' : 'Lançamento criado.'
+    redirect_after_entry_save(@entry, count > 1 ? 'Parcelas planejadas e anos necessários criados.' : 'Lançamento criado.')
   rescue ActiveRecord::RecordInvalid, ArgumentError => e
     @entry ||= Entry.new
     @entry.errors.add(:base, e.message)
@@ -38,12 +49,23 @@ class EntriesController < ApplicationController
   end
   def update
     attrs = entry_params
-    Entry.transaction do
-      @entry.assign_attributes(attrs)
-      @entry.financial_year = YearBuilder.call(@entry.date.year) if @entry.date
-      @entry.save!
+    @entry.assign_attributes(attrs)
+    creates_new_year = @entry.date && !FinancialYear.exists?(year: @entry.date.year)
+    if creates_new_year
+      GoogleCalendarEntrySync.suppress_callbacks do
+        Entry.transaction do
+          @entry.financial_year = YearBuilder.call(@entry.date.year) if @entry.date
+          @entry.save!
+        end
+      end
+      sync_google_calendar_if_connected
+    else
+      Entry.transaction do
+        @entry.financial_year = YearBuilder.call(@entry.date.year) if @entry.date
+        @entry.save!
+      end
     end
-    redirect_to entry_path(@entry), notice: 'Lançamento atualizado.'
+    redirect_after_entry_save(@entry, 'Lançamento atualizado.')
   rescue ActiveRecord::RecordInvalid, ArgumentError => e
     @entry.errors.add(:base, e.message)
     render :edit, status: :unprocessable_entity
@@ -58,5 +80,13 @@ class EntriesController < ApplicationController
     attrs = params.require(:entry).permit(:date, :description, :category_id, :kind, :status, :amount, :payment_method, :notes).to_h
     attrs['amount'] = money_param(attrs['amount'])
     attrs
+  end
+
+  def redirect_after_entry_save(entry, success_message)
+    if current_user.google_calendar_connected? && current_user.google_calendar_sync_error.present?
+      redirect_to entry_path(entry), alert: 'Lançamento salvo, mas o lembrete não foi sincronizado. Verifique o Google Calendar nas Configurações.'
+    else
+      redirect_to entry_path(entry), notice: success_message
+    end
   end
 end

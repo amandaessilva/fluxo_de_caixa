@@ -31,4 +31,13 @@ class ApplicationController < ActionController::Base
   rescue ArgumentError
     raise ArgumentError, 'Informe um valor válido, por exemplo 1250,90.'
   end
+
+  def sync_google_calendar_if_connected
+    return unless current_user.google_calendar_connected?
+
+    GoogleCalendarEntrySync.sync_all
+  rescue GoogleCalendarApi::Error => error
+    Rails.logger.error("Google Calendar bulk sync failed: #{error.class}: #{error.message}")
+    current_user.update_column(:google_calendar_sync_error, 'A sincronização do Google Calendar falhou. Verifique a conexão e tente novamente nas Configurações.')
+  end
 end

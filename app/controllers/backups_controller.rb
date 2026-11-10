@@ -21,13 +21,16 @@ class BackupsController < ApplicationController
   def restore
     preview = current_user.previews.where(purpose: 'backup').where('expires_at > ?', Time.current).find(session[:backup_preview_id])
     raise BackupService::InvalidBackup, 'Confirme a substituição dos dados.' unless params[:confirm] == '1'
-    Preview.transaction do
-      preview.lock!
-      data = preview.payload
-      raise BackupService::InvalidBackup, 'Os dados mudaram. Gere uma nova prévia.' unless data['fingerprint'] == BackupService.fingerprint
-      BackupService.restore!(data.fetch('backup'))
-      preview.destroy!
+    GoogleCalendarEntrySync.suppress_callbacks do
+      Preview.transaction do
+        preview.lock!
+        data = preview.payload
+        raise BackupService::InvalidBackup, 'Os dados mudaram. Gere uma nova prévia.' unless data['fingerprint'] == BackupService.fingerprint
+        BackupService.restore!(data.fetch('backup'))
+        preview.destroy!
+      end
     end
+    sync_google_calendar_if_connected
     session.delete(:backup_preview_id)
     redirect_to settings_path, notice: 'Backup restaurado com sucesso.'
   rescue BackupService::InvalidBackup, ActiveRecord::ActiveRecordError, ArgumentError => e

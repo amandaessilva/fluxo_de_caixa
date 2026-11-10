@@ -7,5 +7,6 @@
 <div><%= f.label :payment_method, 'Forma de pagamento (opcional)' %><%= f.text_field :payment_method, placeholder: 'Ex.: Pix, débito, cartão' %></div>
 <% unless @entry.persisted? %><div><%= label_tag :installments, 'Número de parcelas' %><%= number_field_tag :installments, params[:installments] || 1, min: 1, max: 120, data: { action: 'input->installments#update', installments_target: 'count' } %></div><% end %>
 <div class="full-width"><%= f.label :notes, 'Observações (opcional)' %><%= f.text_area :notes, rows: 3 %></div></div>
+<p class="form-help">Despesas em dinheiro marcadas como planejadas podem gerar lembretes no Google Calendar. Benefícios não geram tarefa de pagamento.</p>
 <% unless @entry.persisted? %><p class="form-help" data-installments-target="hint">Com 2 ou mais parcelas, todos os vencimentos serão criados como planejados. Novos anos recebem as contas fixas cadastradas.</p><% end %>
 <div class="form-actions"><%= f.submit 'Salvar lançamento', class: 'button' %><%= link_to 'Cancelar', entries_path, class: 'button secondary' %></div><% end %>

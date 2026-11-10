@@ -3,3 +3,4 @@
 @media(max-width:800px){.period-form>div{flex:1 1 95px}.period-form .button{width:100%}}
 
 .mobile-logout{display:none}@media(max-width:800px){.mobile-logout{display:block}}
+.badge.overdue{background:#f8e8e4;color:#a64638}

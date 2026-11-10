@@ -21,11 +21,14 @@ class ImportsController < ApplicationController
   def commit
     preview = find_preview
     raise XlsxImporter::InvalidFile, 'Confirme a revisão dos avisos.' unless params[:reviewed] == '1'
-    Preview.transaction do
-      preview.lock!
-      @year = XlsxImporter.commit!(preview.payload, replace: params[:replace] == '1')
-      preview.destroy!
+    GoogleCalendarEntrySync.suppress_callbacks do
+      Preview.transaction do
+        preview.lock!
+        @year = XlsxImporter.commit!(preview.payload, replace: params[:replace] == '1')
+        preview.destroy!
+      end
     end
+    sync_google_calendar_if_connected
     session.delete(:import_preview_id)
     redirect_to root_path(year: @year.year), notice: 'Importação concluída. Quantidades e totais conferidos com a prévia.'
   rescue XlsxImporter::InvalidFile, ActiveRecord::RecordInvalid => e

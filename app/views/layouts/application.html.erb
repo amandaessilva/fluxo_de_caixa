@@ -24,7 +24,7 @@
   </aside>
 <% end %>
 <div class="<%= current_user ? 'workspace' : 'login-workspace' %>">
-  <% if current_user %><header class="topbar"><span>FINANÇAS PESSOAIS <span class="dot">•</span> <%= Date.current.strftime('%d/%m/%Y') %></span><span class="account-chip"><span class="avatar">P</span> Minha conta</span></header><% end %>
+  <% if current_user %><header class="topbar"><span>FINANÇAS PESSOAIS <span class="dot">•</span> <%= Date.current.strftime('%d/%m/%Y') %></span><span class="account-chip"><span class="avatar">AESS</span> Minha conta</span></header><% end %>
   <main id="main">
     <% flash.each do |type, message| %><div class="flash <%= type %>" role="<%= type == 'alert' ? 'alert' : 'status' %>"><%= message %></div><% end %>
     <%= yield %>

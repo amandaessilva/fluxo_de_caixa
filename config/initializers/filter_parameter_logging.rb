@@ -1,1 +1,1 @@
-Rails.application.config.filter_parameters += [:password, :password_confirmation, :token, :file, :description, :notes, :amount, :email, :encrypted_payload, :opening_balance]
+Rails.application.config.filter_parameters += [:password, :password_confirmation, :token, :code, :state, :client_secret, :refresh_token, :access_token, :file, :description, :notes, :amount, :email, :encrypted_payload, :opening_balance]
