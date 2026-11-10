@@ -1,0 +1,19 @@
+name: Rails
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4.8'
+          bundler-cache: true
+      - run: bin/rails db:prepare test
+        env:
+          RAILS_ENV: test
+      - run: bin/rails zeitwerk:check
+      - run: bin/rails assets:precompile
+        env:
+          RAILS_ENV: production
+          SECRET_KEY_BASE_DUMMY: '1'

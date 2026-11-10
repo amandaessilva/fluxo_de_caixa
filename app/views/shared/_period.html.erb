@@ -1,0 +1,6 @@
+<%= form_with url: url, method: :get, class: 'period-form' do |f| %>
+<div><%= f.label :year, 'Ano' %><%= f.select :year, FinancialYear.order(:year).pluck(:year), selected: selected_year.year %></div>
+<% unless local_assigns[:annual] %><div><%= f.label :month, 'Mês' %><%= f.select :month, month_options, selected: selected_month %></div><% end %>
+<% unless local_assigns[:annual] %><div><%= f.label :status, 'Situação' %><%= f.select :status, status_options, selected: selected_status %></div><% end %>
+<%= f.submit 'Atualizar visão', class: 'button secondary' %>
+<% end %>

@@ -1,0 +1,10 @@
+.git
+.bundle
+log/*
+tmp/*
+storage/*
+config/master.key
+config/credentials.yml.enc
+.env
+vendor/bundle
+public/assets

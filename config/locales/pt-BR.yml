@@ -1,0 +1,40 @@
+pt-BR:
+  activerecord:
+    models:
+      entry: Lançamento
+      category: Categoria
+      monthly_limit: Limite mensal
+      financial_year: Ano financeiro
+      recurring_rule: Conta fixa
+      user: Conta
+    attributes:
+      entry:
+        description: Descrição
+        date: Data
+        amount: Valor
+        kind: Tipo
+        status: Situação
+        category: Categoria
+        financial_year: Ano financeiro
+      category:
+        name: Nome
+      monthly_limit:
+        amount: Limite
+        month: Mês
+        category: Categoria
+      financial_year:
+        year: Ano
+        opening_balance: Saldo inicial
+        previous_year: Ano anterior
+      recurring_rule:
+        description: Descrição
+        amount: Valor
+        day: Dia
+        starts_on: Início
+        ends_on: Término
+        kind: Tipo
+        category: Categoria
+      user:
+        email: E-mail
+        password: Senha
+        password_confirmation: Confirmação da senha

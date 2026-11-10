@@ -1,0 +1,8 @@
+<% if entries.any? %>
+<div class="table-scroll"><table><thead><tr><th>Data</th><th>Descrição / categoria</th><th>Tipo</th><th>Situação</th><th class="numeric">Valor</th><th><span class="sr-only">Ações</span></th></tr></thead><tbody>
+<% entries.each do |entry| %><tr>
+<td class="nowrap"><%= l(entry.date) %></td><td><%= link_to entry.description, entry_path(entry), class: 'entry-title' %><small class="cell-sub"><%= entry.category.name %></small></td>
+<td><%= Entry::KINDS[entry.kind] %></td><td><span class="badge <%= entry.status %>"><%= Entry::STATUSES[entry.status] %></span></td>
+<td class="numeric amount <%= %w[income benefit_received].include?(entry.kind) ? 'positive' : '' %>"><%= brl(entry.amount) %></td><td><%= link_to 'Editar', edit_entry_path(entry), class: 'text-link' %></td>
+</tr><% end %></tbody></table></div>
+<% else %><div class="empty"><span class="empty-symbol">↗</span><h3>Um novo começo para suas finanças</h3><p>Nenhum lançamento neste período. Cadastre o primeiro ou importe sua planilha.</p><%= link_to '+ Novo lançamento', new_entry_path, class: 'button secondary' %></div><% end %>

@@ -1,0 +1,11 @@
+<%= render 'shared/errors', record: @entry %>
+<% if Category.none? %><div class="flash notice">Antes de lançar, <%= link_to 'cadastre uma categoria', new_category_path %>.</div><% end %>
+<%= form_with model: @entry, class: 'panel form-panel', data: { controller: 'installments' } do |f| %>
+<div class="form-grid"><div><%= f.label :description, 'Descrição' %><%= f.text_field :description, required: true, maxlength: 220, placeholder: 'Ex.: Conta de internet' %></div><div><%= f.label :date, 'Data / primeiro vencimento' %><%= f.date_field :date, required: true %></div>
+<div><%= f.label :category_id, 'Categoria' %><%= f.select :category_id, category_options, { prompt: 'Selecione uma categoria' }, required: true %></div><div><%= f.label :amount, 'Valor em reais (total da compra, se parcelada)' %><%= f.text_field :amount, value: @entry.amount && number_with_precision(@entry.amount, precision: 2, separator: ','), required: true, inputmode: 'decimal', placeholder: '0,00' %></div>
+<div><%= f.label :kind, 'Tipo' %><%= f.select :kind, kind_options %></div><div><%= f.label :status, 'Situação' %><%= f.select :status, status_options %></div>
+<div><%= f.label :payment_method, 'Forma de pagamento (opcional)' %><%= f.text_field :payment_method, placeholder: 'Ex.: Pix, débito, cartão' %></div>
+<% unless @entry.persisted? %><div><%= label_tag :installments, 'Número de parcelas' %><%= number_field_tag :installments, params[:installments] || 1, min: 1, max: 120, data: { action: 'input->installments#update', installments_target: 'count' } %></div><% end %>
+<div class="full-width"><%= f.label :notes, 'Observações (opcional)' %><%= f.text_area :notes, rows: 3 %></div></div>
+<% unless @entry.persisted? %><p class="form-help" data-installments-target="hint">Com 2 ou mais parcelas, todos os vencimentos serão criados como planejados. Novos anos recebem as contas fixas cadastradas.</p><% end %>
+<div class="form-actions"><%= f.submit 'Salvar lançamento', class: 'button' %><%= link_to 'Cancelar', entries_path, class: 'button secondary' %></div><% end %>

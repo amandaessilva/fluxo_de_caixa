@@ -1,0 +1,10 @@
+<div class="login-card">
+<div class="eyebrow">BEM-VINDO AO SEU ESPAÇO</div><h1>Fluxo de Caixa<span class="gold">.</span></h1>
+<p class="muted">Mais clareza para cuidar do seu dinheiro.</p>
+<%= form_with url: session_path, class: 'stack' do |f| %>
+  <div><%= f.label :email, 'E-mail' %><%= f.email_field :email, required: true, autocomplete: 'username', autofocus: true %></div>
+  <div><%= f.label :password, 'Senha' %><%= f.password_field :password, required: true, autocomplete: 'current-password' %></div>
+  <%= f.submit 'Entrar na minha conta →', class: 'button' %>
+<% end %>
+<p class="small muted">Seus dados financeiros ficam protegidos por senha.</p>
+</div>

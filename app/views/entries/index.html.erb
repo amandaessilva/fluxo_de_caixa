@@ -1,0 +1,11 @@
+<% content_for :title, 'Lançamentos' %><div class="page-heading"><div><div class="eyebrow">CADA MOVIMENTO NO SEU LUGAR</div><h1>Lançamentos<span class="gold">.</span></h1><p class="muted">Consulte, planeje e registre suas movimentações.</p></div><%= link_to '+ Novo lançamento', new_entry_path, class: 'button' %></div>
+<section class="panel filter-panel"><%= form_with url: entries_path, method: :get, class: 'filter-form' do |f| %>
+<div><%= f.label :q, 'Buscar descrição' %><%= f.search_field :q, value: params[:q], placeholder: 'O que você procura?' %></div>
+<div><%= f.label :year, 'Ano' %><%= f.select :year, FinancialYear.order(:year).pluck(:year), selected: selected_year.year %></div>
+<div><%= f.label :month, 'Mês' %><%= f.select :month, month_options, include_blank: 'Todos', selected: params[:month] %></div>
+<div><%= f.label :category_id, 'Categoria' %><%= f.select :category_id, category_options, include_blank: 'Todas', selected: params[:category_id] %></div>
+<div><%= f.label :kind, 'Tipo' %><%= f.select :kind, kind_options, include_blank: 'Todos', selected: params[:kind] %></div>
+<div><%= f.label :status, 'Situação' %><%= f.select :status, status_options, include_blank: 'Todas', selected: params[:status] %></div>
+<%= f.submit 'Filtrar', class: 'button secondary' %><% end %></section>
+<section class="panel"><div class="section-heading"><h2>Suas movimentações</h2><span class="muted small"><%= @count %> registros encontrados</span></div><%= render 'shared/entries', entries: @entries %></section>
+<div class="pagination"><% if @page > 1 %><%= link_to '← Anterior', entries_path(request.query_parameters.merge(page: @page - 1)) %><% end %><span>Página <%= @page %></span><% if @page * 50 < @count %><%= link_to 'Próxima →', entries_path(request.query_parameters.merge(page: @page + 1)) %><% end %></div>

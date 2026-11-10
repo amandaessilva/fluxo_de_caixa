@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <title><%= content_for(:title) || 'Fluxo de Caixa' %> · Finanças pessoais</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <%= csrf_meta_tags %><%= csp_meta_tag %>
+  <%= stylesheet_link_tag 'application', 'data-turbo-track': 'reload' %>
+  <%= javascript_importmap_tags %>
+</head>
+<body>
+<a class="skip-link" href="#main">Pular para o conteúdo</a>
+<% if current_user %>
+  <aside class="sidebar" data-controller="navigation">
+    <%= link_to root_path, class: 'brand' do %><span class="brand-mark">f<span>↗</span></span><span>Fluxo de Caixa<small>SEU DINHEIRO, COM CLAREZA</small></span><% end %>
+    <button class="mobile-toggle" data-action="navigation#toggle" aria-expanded="false" aria-controls="primary-nav">Menu ☰</button>
+    <nav id="primary-nav" data-navigation-target="menu" aria-label="Menu principal">
+      <% [['◫', 'Visão geral', root_path, 'dashboard'], ['⇄', 'Lançamentos', entries_path, 'entries'], ['▦', 'Categorias', categories_path, 'categories'], ['▥', 'Visão anual', annual_path, 'annual'], ['⚙', 'Configurações', settings_path, 'settings']].each do |icon, label, path, key| %>
+        <% active = key == 'annual' ? action_name == 'annual' : controller_name == key && action_name != 'annual' %>
+        <%= link_to path, class: "nav-item #{'active' if active}", aria: { current: active ? 'page' : nil } do %><span aria-hidden="true"><%= icon %></span><%= label %><% end %>
+      <% end %>
+      <div class="mobile-logout"><%= button_to 'Sair da conta ↗', session_path, method: :delete, class: 'logout' %></div>
+    </nav>
+    <div class="sidebar-bottom"><div class="sidebar-note">Um mês de cada vez.<br><strong>Um futuro mais tranquilo.</strong></div><%= button_to 'Sair da conta ↗', session_path, method: :delete, class: 'logout' %></div>
+  </aside>
+<% end %>
+<div class="<%= current_user ? 'workspace' : 'login-workspace' %>">
+  <% if current_user %><header class="topbar"><span>FINANÇAS PESSOAIS <span class="dot">•</span> <%= Date.current.strftime('%d/%m/%Y') %></span><span class="account-chip"><span class="avatar">P</span> Minha conta</span></header><% end %>
+  <main id="main">
+    <% flash.each do |type, message| %><div class="flash <%= type %>" role="<%= type == 'alert' ? 'alert' : 'status' %>"><%= message %></div><% end %>
+    <%= yield %>
+  </main>
+  <% if current_user %><footer>Fluxo de Caixa <span>Organize o presente. Planeje o que vem.</span></footer><% end %>
+</div>
+</body>
+</html>
